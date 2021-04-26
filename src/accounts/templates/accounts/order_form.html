@@ -3,11 +3,17 @@
 
 
 {% block content %}
-<form method="POST" action="">
-  {% csrf_token %}
-    {{form}}
+<div class="mx-auto col-md-4 mt-5"> 
+  <form method="POST" action="" style="width:90%;">
+    {% csrf_token %}
+      {% for form in formset %}
+        {{formset.management_form}}
+        {{form}}
+        <hr>
+      {% endfor %}
       <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+  </form>
+</div>  
 {% endblock %}
 
 
