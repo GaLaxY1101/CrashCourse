@@ -4,6 +4,8 @@ from django.forms import inlineformset_factory # нужно для multiply form
 from .models import *
 from .forms import OrderForm
 
+from .filters import *
+
 def homepage(request):
 	customers = Customer.objects.all() 
 	orders = Order.objects.all()
@@ -30,10 +32,13 @@ def customer(request, pk):
 	orders			= customer.order_set.all() #Обращаемся к ребенку(Order) и к его родителю (Product)
 	orders_c		= orders.count()
 
+	myFilter = OrderFilter(request.GET, queryset=orders) # Filter stuff
+	orders = myFilter.qs
 	return render(request,'accounts/customer.html',{
 		'customer':customer,
 		'orders':orders,
 		'orders_c':orders_c,
+		'myFilter':myFilter,
 		})	
 
 def create_order(request, pk):
