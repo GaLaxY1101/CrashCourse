@@ -1,10 +1,44 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.forms import inlineformset_factory # нужно для multiply form
+#For registration user
+from django.contrib.auth.forms import UserCreationForm
+#For login user
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+#My imports
 from .models import *
-from .forms import OrderForm
-
+from .forms import OrderForm, CreateUserForm
 from .filters import *
+
+def loginPage(request):
+	context = {}		
+	return render(request, 'accounts/login.html', context)
+'''
+	if request.method == "POST":
+		email = request.POST.get('email')
+		password = request.POST.get('password')
+
+		user = authenticate(request, email=email,password=password )
+
+		if user:
+			login(request,user)
+			redirect('home')
+'''
+	
+
+def registerPage(request):
+	form = CreateUserForm()
+
+	if request.method == 'POST':
+		form = CreateUserForm(request.POST)
+		if form.is_valid():
+			form.save()
+			return redirect('home')
+
+	context = {'form':form}
+	return render(request, 'accounts/register.html', context)	
+
 
 def homepage(request):
 	customers = Customer.objects.all() 
@@ -23,9 +57,11 @@ def homepage(request):
 		}
 		)
 
+
 def products(request):
 	products = Product.objects.all()
 	return render(request,'accounts/products.html',{"products":products})
+
 
 def customer(request, pk):
 	customer		= Customer.objects.get(id = pk)
@@ -40,6 +76,7 @@ def customer(request, pk):
 		'orders_c':orders_c,
 		'myFilter':myFilter,
 		})	
+
 
 def create_order(request, pk):
 	OrderFormSet = inlineformset_factory(Customer, Order,fields=('product','status'),extra=5) #екстра - количетсов форм
@@ -57,6 +94,7 @@ def create_order(request, pk):
 	context = {'formset':formset}
 	return render(request, 'accounts/order_form.html',context)
 
+
 def update_order(request, order_pk):
 
 	order = Order.objects.get(id=order_pk)
@@ -69,6 +107,7 @@ def update_order(request, order_pk):
 
 	context = {'form':form}
 	return render(request, 'accounts/order_form.html',context)
+
 
 def delete_order(request, order_pk):
 	order = Order.objects.get(id = order_pk)
