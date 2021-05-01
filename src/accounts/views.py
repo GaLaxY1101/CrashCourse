@@ -12,31 +12,42 @@ from .forms import OrderForm, CreateUserForm
 from .filters import *
 
 def loginPage(request):
-	context = {}		
-	return render(request, 'accounts/login.html', context)
-'''
-	if request.method == "POST":
-		email = request.POST.get('email')
-		password = request.POST.get('password')
-
-		user = authenticate(request, email=email,password=password )
+	form = AccountAuthenticationForm(request.POST)
+	if form.is_valid():
+		email = request.POST['email']
+		password = request.POST['password']
+		user = authenticate(email=email, password=password)
 
 		if user:
 			login(request,user)
-			redirect('home')
-'''
+			return redirect('home')
+
+	else:
+		form = AccountAuthenticationForm()		
+	
+	context = {'login_form':form}		
+	return render(request, 'accounts/login.html', context)
+
 	
 
 def registerPage(request):
-	form = CreateUserForm()
-
+	context = {}
 	if request.method == 'POST':
 		form = CreateUserForm(request.POST)
 		if form.is_valid():
 			form.save()
+			email = form.cleaned_data.get('email')
+			raw_password = form.cleaned_data.get('password1')
+			account = authenticate(email=email,password=raw_password )
+			login(request,account)
 			return redirect('home')
+		else:
+			context['form'] = form 
+	else:
+		form = CreateUserForm()
 
-	context = {'form':form}
+
+	context['form'] = form
 	return render(request, 'accounts/register.html', context)	
 
 
