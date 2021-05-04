@@ -8,24 +8,31 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 #My imports
 from .models import *
-from .forms import OrderForm, CreateUserForm
+from .forms import OrderForm, CreateUserForm, AccountAuthenticationForm
 from .filters import *
 
 def loginPage(request):
-	form = AccountAuthenticationForm(request.POST)
-	if form.is_valid():
-		email = request.POST['email']
-		password = request.POST['password']
-		user = authenticate(email=email, password=password)
-
-		if user:
-			login(request,user)
-			return redirect('home')
-
-	else:
-		form = AccountAuthenticationForm()		
+	context = {}
 	
-	context = {'login_form':form}		
+	user = request.user
+
+	if user.is_authenticated:
+		return redirect('home')
+	
+	if request.POST:
+		form = AccountAuthenticationForm(request.POST)
+		if form.is_valid():
+			email = request.POST['email']
+			password = request.POST['password']
+			user = authenticate(email=email, password=password)
+			if user:
+				login(request,user)
+				return redirect('home')
+	else:
+		form = 	AccountAuthenticationForm()
+
+	context['form']=form	
+
 	return render(request, 'accounts/login.html', context)
 
 	
@@ -128,3 +135,7 @@ def delete_order(request, order_pk):
 
 	context = {"order":order}
 	return render(request, 'accounts/delete.html',context)
+
+def logout_view(request):
+	logout(request)
+	return redirect('home')	
