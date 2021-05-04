@@ -12,13 +12,14 @@
 			<a class="btn btn-primary  btn-sm btn-block" href="">Create Customer</a>
 			<table class="table table-sm">	
 				<tr>
+					<th></th>
 					<th>Customer</th>
 					<th>Phone</th>
 				</tr>
 				{% for i in customers %}
 				<tr>
 					<td><a class="btn btn-sm btn-primary" href="{% url 'customer' i.id %}">View</a></td>
-					<td>{{ i.name }}</td>
+					<td>{{ i.username }}</td>
 					<td>{{ i.phone_number }}</td>
 				</tr>
 				{% endfor %}

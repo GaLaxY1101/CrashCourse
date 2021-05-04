@@ -1,10 +1,62 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.forms import inlineformset_factory # нужно для multiply form
+#For registration user
+from django.contrib.auth.forms import UserCreationForm
+#For login user
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+#My imports
 from .models import *
-from .forms import OrderForm
-
+from .forms import OrderForm, CreateUserForm, AccountAuthenticationForm
 from .filters import *
+
+def loginPage(request):
+	context = {}
+	
+	user = request.user
+
+	if user.is_authenticated:
+		return redirect('home')
+	
+	if request.POST:
+		form = AccountAuthenticationForm(request.POST)
+		if form.is_valid():
+			email = request.POST['email']
+			password = request.POST['password']
+			user = authenticate(email=email, password=password)
+			if user:
+				login(request,user)
+				return redirect('home')
+	else:
+		form = 	AccountAuthenticationForm()
+
+	context['form']=form	
+
+	return render(request, 'accounts/login.html', context)
+
+	
+
+def registerPage(request):
+	context = {}
+	if request.method == 'POST':
+		form = CreateUserForm(request.POST)
+		if form.is_valid():
+			form.save()
+			email = form.cleaned_data.get('email')
+			raw_password = form.cleaned_data.get('password1')
+			account = authenticate(email=email,password=raw_password )
+			login(request,account)
+			return redirect('home')
+		else:
+			context['form'] = form 
+	else:
+		form = CreateUserForm()
+
+
+	context['form'] = form
+	return render(request, 'accounts/register.html', context)	
+
 
 def homepage(request):
 	customers = Customer.objects.all() 
@@ -23,9 +75,11 @@ def homepage(request):
 		}
 		)
 
+
 def products(request):
 	products = Product.objects.all()
 	return render(request,'accounts/products.html',{"products":products})
+
 
 def customer(request, pk):
 	customer		= Customer.objects.get(id = pk)
@@ -40,6 +94,7 @@ def customer(request, pk):
 		'orders_c':orders_c,
 		'myFilter':myFilter,
 		})	
+
 
 def create_order(request, pk):
 	OrderFormSet = inlineformset_factory(Customer, Order,fields=('product','status'),extra=5) #екстра - количетсов форм
@@ -57,6 +112,7 @@ def create_order(request, pk):
 	context = {'formset':formset}
 	return render(request, 'accounts/order_form.html',context)
 
+
 def update_order(request, order_pk):
 
 	order = Order.objects.get(id=order_pk)
@@ -70,6 +126,7 @@ def update_order(request, order_pk):
 	context = {'form':form}
 	return render(request, 'accounts/order_form.html',context)
 
+
 def delete_order(request, order_pk):
 	order = Order.objects.get(id = order_pk)
 	if request.method == 'POST':
@@ -78,3 +135,7 @@ def delete_order(request, order_pk):
 
 	context = {"order":order}
 	return render(request, 'accounts/delete.html',context)
+
+def logout_view(request):
+	logout(request)
+	return redirect('home')	
