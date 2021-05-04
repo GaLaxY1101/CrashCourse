@@ -14,7 +14,35 @@
             <a class="nav-link active text-light" aria-current="page" 
             href="{% url 'products' %}">Products</a>
           </li>
-        </ul>
+        </ul>  
+          {% if request.user.is_authenticated %}
+          <ul class="navbar-nav d-flex flex-row me-5"> 
+            <li class="nav-item w-auto">
+              <a class="nav-link active text-light" aria-current="page">
+              Hello, <b>{{ request.user.username }}</b></a>
+            </li>
+            <li>
+              <a class="nav-link active text-light" aria-current="page">|</a>
+            </li>
+            <li>
+              <a class="nav-link active text-light" aria-current="page" href="{% url 'logout' %}">Logout</a>
+            </li>
+          </ul>  
+              {% else %}
+              <ul class="navbar-nav d-flex flex-row me-5">
+                <li class="nav-item">  
+                  <a class="nav-link active text-light" aria-current="page" href="{% url 'register' %}">
+                  Register </a>
+                </li>
+                <li class="nav-item">  
+                  <a class="nav-link active text-light" aria-current="page">|</a>
+                </li>  
+                <li class="nav-item">  
+                  <a class="nav-link active text-light" aria-current="page" href="{% url 'login' %}">
+                  Login </a>
+                </li> 
+              </ul>  
+            {% endif %}
       </div>
     </div>
 </nav>
